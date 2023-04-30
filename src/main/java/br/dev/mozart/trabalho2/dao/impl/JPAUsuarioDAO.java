@@ -9,7 +9,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.OptimisticLockException;
-import org.hibernate.ObjectDeletedException;
 
 import java.util.List;
 
@@ -33,12 +32,6 @@ public class JPAUsuarioDAO implements UsuarioDAO {
             tx.commit();
             return umUsuario.getId();
         } catch (RuntimeException e) {
-            if (tx != null) {
-                try {
-                    tx.rollback();
-                } catch (RuntimeException ignored) {
-                }
-            }
             throw e;
         }
     }
@@ -53,7 +46,7 @@ public class JPAUsuarioDAO implements UsuarioDAO {
             // 2. Retorna null caso a linha não seja encontrada no banco.
 
             if (umUsuario == null) {
-                throw new UsuarioNaoEncontradoException("Produto não encontrado");
+                throw new UsuarioNaoEncontradoException("usuário não encontrado");
             }
             return umUsuario;
         }
@@ -70,7 +63,7 @@ public class JPAUsuarioDAO implements UsuarioDAO {
 
             if (usuario == null) {
                 tx.rollback();
-                throw new UsuarioNaoEncontradoException("Produto não encontrado.");
+                throw new UsuarioNaoEncontradoException("Usuário não encontrado.");
             }
             // O merge entre nada e tudo é tudo. Ao tentar alterar um produto deletado ele será re-inserido
             // no banco de dados.
@@ -78,10 +71,7 @@ public class JPAUsuarioDAO implements UsuarioDAO {
 
             tx.commit();
         } catch (OptimisticLockException e) {
-            if (tx != null) {
-                tx.rollback();
-            }
-            throw new EntidadeDesatualizadaException(e.getMessage());
+            throw new EntidadeDesatualizadaException("Esse usuário já foi atualizado por outra pessoa");
         }
     }
 
@@ -96,16 +86,13 @@ public class JPAUsuarioDAO implements UsuarioDAO {
 
             if (usuario == null) {
                 tx.rollback();
-                throw new UsuarioNaoEncontradoException("Produto não encontrado");
+                throw new UsuarioNaoEncontradoException("Usuário não encontrado");
             }
 
             em.remove(usuario);
             tx.commit();
 
         } catch (RuntimeException e) {
-            if (tx != null) {
-                tx.rollback();
-            }
             throw e;
         }
     }
