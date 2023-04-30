@@ -1,12 +1,15 @@
 package br.dev.mozart.trabalho2.dao.impl;
 
 import br.dev.mozart.trabalho2.dao.UsuarioDAO;
+import br.dev.mozart.trabalho2.excecao.EntidadeDesatualizadaException;
 import br.dev.mozart.trabalho2.excecao.UsuarioNaoEncontradoException;
 import br.dev.mozart.trabalho2.modelo.Usuario;
 import br.dev.mozart.trabalho2.util.FabricaDeEntityManager;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
+import jakarta.persistence.OptimisticLockException;
+import org.hibernate.ObjectDeletedException;
 
 import java.util.List;
 
@@ -56,7 +59,7 @@ public class JPAUsuarioDAO implements UsuarioDAO {
         }
     }
 
-    public void altera(Usuario umUsuario) throws UsuarioNaoEncontradoException {
+    public void altera(Usuario umUsuario) throws UsuarioNaoEncontradoException, EntidadeDesatualizadaException {
         EntityTransaction tx = null;
         Usuario usuario = null;
         try (EntityManager em = FabricaDeEntityManager.criarEntityManager()) {
@@ -74,11 +77,11 @@ public class JPAUsuarioDAO implements UsuarioDAO {
             em.merge(umUsuario);
 
             tx.commit();
-        } catch (RuntimeException e) {
+        } catch (OptimisticLockException e) {
             if (tx != null) {
                 tx.rollback();
             }
-            throw e;
+            throw new EntidadeDesatualizadaException(e.getMessage());
         }
     }
 

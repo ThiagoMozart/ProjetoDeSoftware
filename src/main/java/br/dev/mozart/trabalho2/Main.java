@@ -1,6 +1,7 @@
 package br.dev.mozart.trabalho2;
 
 import br.dev.mozart.trabalho2.dao.UsuarioDAO;
+import br.dev.mozart.trabalho2.excecao.EntidadeDesatualizadaException;
 import br.dev.mozart.trabalho2.excecao.UsuarioNaoEncontradoException;
 import br.dev.mozart.trabalho2.modelo.Usuario;
 import br.dev.mozart.trabalho2.util.FabricaDeDAOs;
@@ -123,7 +124,7 @@ public class Main {
 
                                 System.out.println('\n' +
                                         "Alteração de nome efetuada com sucesso!");
-                            } catch (UsuarioNaoEncontradoException e) {
+                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -138,7 +139,7 @@ public class Main {
                                 System.out.println('\n' +
                                         "Alteração de CPF efetuada " +
                                         "com sucesso!");
-                            } catch (UsuarioNaoEncontradoException e) {
+                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -153,7 +154,7 @@ public class Main {
                                 System.out.println('\n' +
                                         "Alteração de CEP efetuada " +
                                         "com sucesso!");
-                            } catch (UsuarioNaoEncontradoException e) {
+                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -168,7 +169,7 @@ public class Main {
                                 System.out.println('\n' +
                                         "Alteração de interesses efetuada " +
                                         "com sucesso!");
-                            } catch (UsuarioNaoEncontradoException e) {
+                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -193,19 +194,19 @@ public class Main {
                             "Nome = " + umUsuario.getNome() +
                             "CPF  = " + umUsuario.getCpf());
 
-                    System.out.println("Confirme a remoção do produto: (S/N)");
+                    System.out.println("Confirme a remoção do usuário: (S/N)");
                     String resp = scanner.next();
 
                     if (resp.equals("S")) {
                         try {
                             usuarioDAO.exclui(umUsuario.getId());
                             System.out.println('\n' +
-                                    "Produto removido com sucesso!");
+                                    "Usuário removido com sucesso!");
                         } catch (UsuarioNaoEncontradoException e) {
                             System.out.println('\n' + e.getMessage());
                         }
                     } else {
-                        System.out.println('\n' + "Produto não removido.");
+                        System.out.println('\n' + "Usuário não removido.");
                     }
                 }
 
