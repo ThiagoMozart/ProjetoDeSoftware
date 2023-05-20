@@ -4,108 +4,90 @@ import br.dev.mozart.trabalho2.dao.UsuarioDAO;
 import br.dev.mozart.trabalho2.excecao.EntidadeDesatualizadaException;
 import br.dev.mozart.trabalho2.excecao.UsuarioNaoEncontradoException;
 import br.dev.mozart.trabalho2.modelo.Usuario;
-import br.dev.mozart.trabalho2.util.FabricaDeEntityManager;
+import br.dev.mozart.trabalho2.util.JPAUtil;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.OptimisticLockException;
 
 import java.util.List;
 
 public class JPAUsuarioDAO implements UsuarioDAO {
-    public Long inclui(Usuario umUsuario) {
+    public Long inclui(Usuario umUsuario) throws UsuarioNaoEncontradoException {
 
-        EntityTransaction tx = null;
-        try (EntityManager em = FabricaDeEntityManager.criarEntityManager()) {
-            // transiente - Objeto cujo valor do atributo identificador é null
-            // persistente - Objeto que está sendo monitorado pelo entity manager
-            // destacado - Objeto cujo valor do atributo identificador é diferente de null
-            //             e não está sendo monitorado pelo entity manager.
-            tx = em.getTransaction();
-            tx.begin();
-            // 1. Executar o comando insert
-            // 2. Atribui ao id do produto o seu valor
-            // 3. Acrescenta o objeto umProduto à lista de objetos monitorados do entity manager
+        try {
+            EntityManager em = JPAUtil.getEntityManager();
             em.persist(umUsuario);
-            // System.out.println(umProduto.getId());
-            // umProduto.setNome("abc");
-            tx.commit();
+
             return umUsuario.getId();
         } catch (RuntimeException e) {
-            throw e;
+            throw new UsuarioNaoEncontradoException(e.getMessage());
         }
     }
 
     public Usuario recuperaUmUsuario(Long numero) throws UsuarioNaoEncontradoException {
 
-        try (EntityManager em = FabricaDeEntityManager.criarEntityManager()) {
-            Usuario umUsuario = em.find(Usuario.class, numero);
+        EntityManager em = JPAUtil.getEntityManager();
+        Usuario umUsuario = em.find(Usuario.class, numero);
 
-            // Características no método find():
-            // 1. É genérico: não requer um cast.
-            // 2. Retorna null caso a linha não seja encontrada no banco.
+        // Características no método find():
+        // 1. É genérico: não requer um cast.
+        // 2. Retorna null caso a linha não seja encontrada no banco.
 
-            if (umUsuario == null) {
-                throw new UsuarioNaoEncontradoException("usuário não encontrado");
-            }
-            return umUsuario;
+        if (umUsuario == null) {
+            throw new UsuarioNaoEncontradoException("usuário não encontrado");
         }
+        return umUsuario;
+
     }
 
     public void altera(Usuario umUsuario) throws UsuarioNaoEncontradoException, EntidadeDesatualizadaException {
-        EntityTransaction tx = null;
-        Usuario usuario = null;
-        try (EntityManager em = FabricaDeEntityManager.criarEntityManager()) {
-            tx = em.getTransaction();
-            tx.begin();
 
+        Usuario usuario = null;
+
+        try {
+            EntityManager em = JPAUtil.getEntityManager();
             usuario = em.find(Usuario.class, umUsuario.getId(), LockModeType.PESSIMISTIC_WRITE);
 
             if (usuario == null) {
-                tx.rollback();
                 throw new UsuarioNaoEncontradoException("Usuário não encontrado.");
             }
             // O merge entre nada e tudo é tudo. Ao tentar alterar um produto deletado ele será re-inserido
             // no banco de dados.
             em.merge(umUsuario);
 
-            tx.commit();
         } catch (OptimisticLockException e) {
             throw new EntidadeDesatualizadaException("Esse usuário já foi atualizado por outra pessoa");
+        }
+        catch (RuntimeException e) {
+            throw new UsuarioNaoEncontradoException(e.getMessage());
         }
     }
 
     public void exclui(Long numero) throws UsuarioNaoEncontradoException {
 
-        EntityTransaction tx = null;
-        try (EntityManager em = FabricaDeEntityManager.criarEntityManager()) {
-            tx = em.getTransaction();
-            tx.begin();
+        try {
+            EntityManager em = JPAUtil.getEntityManager();
 
             Usuario usuario = em.find(Usuario.class, numero);
 
             if (usuario == null) {
-                tx.rollback();
                 throw new UsuarioNaoEncontradoException("Usuário não encontrado");
             }
 
             em.remove(usuario);
-            tx.commit();
 
         } catch (RuntimeException e) {
-            throw e;
+            throw new UsuarioNaoEncontradoException(e.getMessage());
         }
     }
 
     public List<Usuario> recuperaUsuarios() {
 
-        try (EntityManager em = FabricaDeEntityManager.criarEntityManager()) {
-
+        EntityManager em = JPAUtil.getEntityManager();
             // Retorna um List vazio caso a tabela correspondente esteja vazia.
 
-            return em
-                    .createQuery("select u from Usuario u order by u.id", Usuario.class)
-                    .getResultList();
-        }
+        return em
+                .createQuery("select u from Usuario u order by u.id", Usuario.class)
+                .getResultList();
     }
 }

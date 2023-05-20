@@ -1,10 +1,8 @@
 package br.dev.mozart.trabalho2;
 
-import br.dev.mozart.trabalho2.dao.UsuarioDAO;
-import br.dev.mozart.trabalho2.excecao.EntidadeDesatualizadaException;
 import br.dev.mozart.trabalho2.excecao.UsuarioNaoEncontradoException;
 import br.dev.mozart.trabalho2.modelo.Usuario;
-import br.dev.mozart.trabalho2.util.FabricaDeDAOs;
+import br.dev.mozart.trabalho2.servico.UsuarioServico;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,10 +26,7 @@ public class Main {
         boolean fidelidade;
         Usuario umUsuario;
 
-        UsuarioDAO usuarioDAO = FabricaDeDAOs.getDAO(UsuarioDAO.class);
-        if (usuarioDAO == null) {
-            return;
-        }
+        UsuarioServico usuarioServico = new UsuarioServico();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -81,7 +76,12 @@ public class Main {
                     umUsuario.setFidelidade(fidelidade);
                     umUsuario.setCep(cep);
 
-                    usuarioDAO.inclui(umUsuario);
+                    try {
+                        usuarioServico.inclui(umUsuario);
+                    }catch (UsuarioNaoEncontradoException e){
+                        System.out.println('\n' + e.getMessage());
+                        break;
+                    }
 
                     System.out.println('\n' + "ID do usuário" +
                             umUsuario.getId() + " incluído com sucesso!");
@@ -92,18 +92,18 @@ public class Main {
                     Long resposta = scanner.nextLong();
 
                     try {
-                        umUsuario = usuarioDAO.recuperaUmUsuario(resposta);
+                        umUsuario = usuarioServico.recuperaUsuario(resposta);
                     } catch (UsuarioNaoEncontradoException e) {
                         System.out.println('\n' + e.getMessage());
                         break;
                     }
 
                     System.out.println('\n' +
-                            "Número =     " + umUsuario.getId()   +
-                            "  Nome =     " + umUsuario.getNome() +
-                            "   CPF =     " + umUsuario.getCpf()  +
-                            "   CEP =     " + umUsuario.getCep()  +
-                            "Interesses = " + umUsuario.getInteresses());
+                            "Número = " + umUsuario.getId()   +
+                            '\n' + "Nome = " + umUsuario.getNome() +
+                            '\n' + "CPF = " + umUsuario.getCpf()  +
+                            '\n' + "CEP = " + umUsuario.getCep()  +
+                            '\n' + "Interesses = " + umUsuario.getInteresses());
 
                     System.out.println('\n' + "O que você deseja alterar?");
                     System.out.println('\n' + "1. Nome");
@@ -120,11 +120,11 @@ public class Main {
                             String novoNome = scanner.next();
                             umUsuario.setNome(novoNome);
                             try {
-                                usuarioDAO.altera(umUsuario);
+                                usuarioServico.alteraUsuario(umUsuario);
 
                                 System.out.println('\n' +
                                         "Alteração de nome efetuada com sucesso!");
-                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
+                            } catch (UsuarioNaoEncontradoException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -134,12 +134,12 @@ public class Main {
                             String novoCpf = scanner.next();
                             umUsuario.setCpf(novoCpf);
                             try {
-                                usuarioDAO.altera(umUsuario);
+                                usuarioServico.alteraUsuario(umUsuario);
 
                                 System.out.println('\n' +
                                         "Alteração de CPF efetuada " +
                                         "com sucesso!");
-                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
+                            } catch (UsuarioNaoEncontradoException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -149,12 +149,12 @@ public class Main {
                             String novoCep = scanner.next();
                             umUsuario.setCep(novoCep);
                             try {
-                                usuarioDAO.altera(umUsuario);
+                                usuarioServico.alteraUsuario(umUsuario);
 
                                 System.out.println('\n' +
                                         "Alteração de CEP efetuada " +
                                         "com sucesso!");
-                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
+                            } catch (UsuarioNaoEncontradoException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -164,12 +164,12 @@ public class Main {
                             String novoInteresses = scanner.next();
                             umUsuario.setCpf(novoInteresses);
                             try {
-                                usuarioDAO.altera(umUsuario);
+                                usuarioServico.alteraUsuario(umUsuario);
 
                                 System.out.println('\n' +
                                         "Alteração de interesses efetuada " +
                                         "com sucesso!");
-                            } catch (UsuarioNaoEncontradoException | EntidadeDesatualizadaException e) {
+                            } catch (UsuarioNaoEncontradoException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
                         }
@@ -183,23 +183,23 @@ public class Main {
                     Long resposta = scanner.nextLong();
 
                     try {
-                        umUsuario = usuarioDAO.recuperaUmUsuario(resposta);
+                        umUsuario = usuarioServico.recuperaUsuario(resposta);
                     } catch (UsuarioNaoEncontradoException e) {
                         System.out.println('\n' + e.getMessage());
                         break;
                     }
 
                     System.out.println('\n' +
-                            "ID   = " + umUsuario.getId() +
-                            "Nome = " + umUsuario.getNome() +
-                            "CPF  = " + umUsuario.getCpf());
+                            "ID = " + umUsuario.getId() +
+                            '\n' + "Nome = " + umUsuario.getNome() +
+                            '\n' + "CPF  = " + umUsuario.getCpf());
 
                     System.out.println("Confirme a remoção do usuário: (S/N)");
                     String resp = scanner.next();
 
                     if (resp.equals("S")) {
                         try {
-                            usuarioDAO.exclui(umUsuario.getId());
+                            usuarioServico.excluiUsuario(umUsuario.getId());
                             System.out.println('\n' +
                                     "Usuário removido com sucesso!");
                         } catch (UsuarioNaoEncontradoException e) {
@@ -211,7 +211,7 @@ public class Main {
                 }
 
                 case 4 -> {
-                    List<Usuario> usuarios = usuarioDAO.recuperaUsuarios();
+                    List<Usuario> usuarios = usuarioServico.recuperaUsuarios();
 
 //                  Utilizando um consumer. Consumer é uma interface funcional. Ela recebe um
 //                  argumento e não retorna nada. Para que um valor seja aceito pelo Consumer
@@ -225,11 +225,11 @@ public class Main {
 
                     for (Usuario usuario : usuarios) {
                         System.out.println('\n' +
-                                "ID =   " + usuario.getId()   +
-                                "Nome = " + usuario.getNome() +
-                                "CPF  = " + usuario.getCpf()  +
-                                "CEP =  " + usuario.getCep()  +
-                                "Interesses = " + usuario.getInteresses());
+                                "ID = " + usuario.getId()   +
+                                '\n' + "Nome = " + usuario.getNome() +
+                                '\n' + "CPF  = " + usuario.getCpf()  +
+                                '\n' + "CEP = " + usuario.getCep()  +
+                                '\n' + "Interesses = " + usuario.getInteresses());
                     }
                 }
 

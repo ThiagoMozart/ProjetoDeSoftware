@@ -7,7 +7,7 @@ import br.dev.mozart.trabalho2.modelo.Usuario;
 import java.util.List;
 
 public interface UsuarioDAO {
-    Long inclui(Usuario umUsuario);
+    Long inclui(Usuario umUsuario) throws UsuarioNaoEncontradoException;
     void altera(Usuario umUsuario) throws UsuarioNaoEncontradoException, EntidadeDesatualizadaException;
     void exclui(Long id) throws UsuarioNaoEncontradoException;
     Usuario recuperaUmUsuario(Long numero) throws UsuarioNaoEncontradoException;
