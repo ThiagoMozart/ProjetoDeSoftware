@@ -1,7 +1,13 @@
 package br.dev.mozart.trabalho2;
 
+import br.dev.mozart.trabalho2.excecao.EntidadeExeception;
+import br.dev.mozart.trabalho2.excecao.ExemplarNaoEncontradoException;
+import br.dev.mozart.trabalho2.excecao.QuadrinhosNaoEncontradoException;
 import br.dev.mozart.trabalho2.excecao.UsuarioNaoEncontradoException;
+import br.dev.mozart.trabalho2.modelo.Exemplar;
+import br.dev.mozart.trabalho2.modelo.Quadrinhos;
 import br.dev.mozart.trabalho2.modelo.Usuario;
+import br.dev.mozart.trabalho2.servico.ExemplarServico;
 import br.dev.mozart.trabalho2.servico.UsuarioServico;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +31,10 @@ public class Main {
         String interesses;
         boolean fidelidade;
         Usuario umUsuario;
+        Exemplar umExemplar;
 
         UsuarioServico usuarioServico = new UsuarioServico();
+        ExemplarServico exemplarServico = new ExemplarServico();
 
         Scanner scanner = new Scanner(System.in);
 
@@ -38,9 +46,14 @@ public class Main {
             System.out.println("2. Alterar um usuário");
             System.out.println("3. Remover um usuário");
             System.out.println("4. Listar todos os usuários");
-            System.out.println("5. Sair");
 
-            System.out.println('\n' + "Digite um número entre 1 e 5:");
+            System.out.println("5. Cadastrar um exemplar");
+            System.out.println("6. Alterar um exemplar");
+            System.out.println("7. Remover um exemplar");
+            System.out.println("8. Listar todos os exemplares");
+            System.out.println("9. Sair");
+
+            System.out.println('\n' + "Digite um número entre 1 e 9:");
             int opcao = scanner.nextInt();
 
             switch (opcao) {
@@ -234,6 +247,89 @@ public class Main {
                 }
 
                 case 5 -> {
+                    System.out.println('\n' + "O quadrinho existe? (S/N) ");
+                    String resp = scanner.next();
+
+                    Quadrinhos quadrinhos = new Quadrinhos();
+                    if (resp.equals("S")){
+                        System.out.println('\n' + "Informe o código do quadrinho: ");
+                        Long codigo = scanner.nextLong();
+                        quadrinhos.setCodigo(codigo);
+                    }
+                    else{
+                        System.out.println('\n' + "Informe o nome do quadrinho: ");
+                        String tituloQuadrinho = scanner.next();
+                        quadrinhos.setTitulo(tituloQuadrinho);
+
+                        System.out.println('\n' + "Informe o nome do autor: ");
+                        String nomeAutor = scanner.next();
+                        quadrinhos.setAutor(nomeAutor);
+
+                        System.out.println('\n' + "Informe o tema: ");
+                        String tema = scanner.next();
+                        quadrinhos.setTema(tema);
+
+                        System.out.println('\n' + "Informe o número da Primeira Edição: ");
+                        int numeroEdicao = scanner.nextInt();
+                        quadrinhos.setPrimeiraEdicao(numeroEdicao);
+                    }
+
+                    System.out.println('\n' + "Informe a data de aquisição: ");
+                    String dataAquisicao = scanner.next();
+
+                    System.out.println('\n' + "Informe a editora: ");
+                    String editora = scanner.next();
+
+                    System.out.println('\n' + "Informe a data de publicação: ");
+                    String dataDePublicacao = scanner.next();
+
+                    System.out.println('\n' + "Informe o estado de conservação: ");
+                    String estadoConservacao = scanner.next();
+
+                    System.out.println('\n' + "Informe o tipo de capa do Exemplar: ");
+                    String tipoCapa = scanner.next();
+
+                    System.out.println('\n' + "Informe a edição: ");
+                    String edicao = scanner.next();
+
+                    umExemplar = new Exemplar();
+                    umExemplar.setQuadrinhos(quadrinhos);
+                    umExemplar.setDataAquisicao(dataAquisicao);
+                    umExemplar.setEditora(editora);
+                    umExemplar.setDataPublicacao(dataDePublicacao);
+                    umExemplar.setEstadoConservacao(estadoConservacao);
+                    umExemplar.setTipoCapa(tipoCapa);
+                    umExemplar.setEdicao(edicao);
+
+                    try {
+                        exemplarServico.inclui(umExemplar);
+                    }catch (ExemplarNaoEncontradoException e){
+                        System.out.println('\n' + e.getMessage());
+                        break;
+                    } catch (QuadrinhosNaoEncontradoException | EntidadeExeception e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    System.out.println('\n' + "ID do Exemplar" +
+                            umExemplar.getCodigo() + " incluído com sucesso!");
+                }
+                case 8 -> {
+                    List<Exemplar> exemplares = exemplarServico.recuperaExemplares();
+
+                    for (Exemplar exemplar : exemplares) {
+                        System.out.println('\n' +
+                                "ID = " + exemplar.getCodigo()   +
+                                '\n' + "Quadrinho = " + exemplar.getQuadrinhos() +
+                                '\n' + "Data de Aquisição  = " + exemplar.getDataAquisicao()  +
+                                '\n' + "Editora = " + exemplar.getEditora()  +
+                                '\n' + "Data de Publicação = " + exemplar.getDataPublicacao()  +
+                                '\n' + "Estado de Conservação = " + exemplar.getEstadoConservacao()  +
+                                '\n' + "Tipo de Capa = " + exemplar.getTipoCapa()  +
+                                '\n' + "Edição = " + exemplar.getEdicao());
+                    }
+                }
+
+                case 9 -> {
                     continua = false;
                 }
                 default -> System.out.println('\n' + "Opção inválida!");
