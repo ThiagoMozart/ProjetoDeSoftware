@@ -13,7 +13,6 @@ public class UsuarioServico {
     private static UsuarioDAO usuarioDAO = FabricaDeDAOs.getDAO(UsuarioDAO.class);
 
     public long inclui(Usuario umUsuario) throws UsuarioNaoEncontradoException {
-        
         JPAUtil.beginTransaction();
         long id = usuarioDAO.inclui(umUsuario);
         JPAUtil.commitTransaction();

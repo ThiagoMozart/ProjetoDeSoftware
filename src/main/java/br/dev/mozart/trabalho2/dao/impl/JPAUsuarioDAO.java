@@ -16,7 +16,7 @@ public class JPAUsuarioDAO implements UsuarioDAO {
 
         try {
             EntityManager em = JPAUtil.getEntityManager();
-            em.persist(umUsuario);
+            em.persist(umUsuario); // Salva o usuário
 
             return umUsuario.getId();
         } catch (RuntimeException e) {

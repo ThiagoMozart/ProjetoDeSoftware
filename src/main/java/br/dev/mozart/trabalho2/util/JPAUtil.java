@@ -1,111 +1,139 @@
 package br.dev.mozart.trabalho2.util;
-
 import br.dev.mozart.trabalho2.excecao.InfraestruturaException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.Persistence;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JPAUtil {
-    private static EntityManagerFactory emf;
+
+    private static final Logger logger = LoggerFactory.getLogger(JPAUtil.class);
+
+    private static JPAUtil jpaUtil = null;
+    private final EntityManagerFactory entityManagerFactory;
     private static final ThreadLocal<EntityManager> threadEntityManager = new ThreadLocal<>();
     private static final ThreadLocal<EntityTransaction> threadTransaction = new ThreadLocal<>();
+    private static final ThreadLocal<Integer> threadTransactionCount = new ThreadLocal<>();
 
-    static {
-        try {
-            emf = Persistence.createEntityManagerFactory("trabalho2");
-        } catch (Throwable e) {
-            e.printStackTrace();
-            System.out.println(">>>>>>>>>> Mensagem de erro: " + e.getMessage());
-            throw e;
+    private JPAUtil() {
+        entityManagerFactory = Persistence.createEntityManagerFactory("trabalho03");
+    }
+
+    public static void beginTransaction() {
+        EntityTransaction transaction = threadTransaction.get();
+        Integer transactionCount = threadTransactionCount.get();
+
+        if (transaction == null) {
+            try {
+                transaction = getEntityManager().getTransaction();
+                transaction.begin();
+                transactionCount = 1;
+                threadTransactionCount.set(transactionCount);
+                threadTransaction.set(transaction);
+                logger.info(">>>> Criou a transação");
+            }
+            catch (RuntimeException ex) {
+                throw new InfraestruturaException(ex);
+            }
+        }
+        else {
+            transactionCount++;
+            threadTransactionCount.set(transactionCount);
         }
     }
 
-    public static void beginTransaction() { // System.out.println("Vai criar transacao");
+    public static EntityManager getEntityManager() {
+        EntityManager entityManager;
 
-        EntityTransaction tx = threadTransaction.get();
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Entrou em beginTransaction()");
         try {
-            if (tx == null) {
-                tx = getEntityManager().getTransaction();
-                tx.begin();
-                threadTransaction.set(tx);
-                // System.out.println("Criou transacao");
-            } else { // System.out.println("Nao criou transacao");
+            if (jpaUtil == null) {
+                jpaUtil = new JPAUtil();
             }
-        } catch (RuntimeException ex) {
+            entityManager = threadEntityManager.get();
+            if (entityManager == null) {
+                entityManager = jpaUtil.entityManagerFactory.createEntityManager();
+                threadEntityManager.set(entityManager);
+                logger.info(">>>> Criou o entity manager");
+            }
+        }
+        catch (RuntimeException ex) {
             throw new InfraestruturaException(ex);
         }
-    }
 
-    public static EntityManager getEntityManager() { // System.out.println("Abriu ou recuperou sess�o");
-
-        EntityManager s = threadEntityManager.get();
-        // Abre uma nova Sess�o, se a thread ainda n�o possui uma.
-        try {
-            if (s == null) {
-                s = emf.createEntityManager();
-                threadEntityManager.set(s);
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Criou o entity manager");
-            }
-        } catch (RuntimeException ex) {
-            throw new InfraestruturaException(ex);
-        }
-        return s;
+        return entityManager;
     }
 
     public static void commitTransaction() {
-        EntityTransaction tx = threadTransaction.get();
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Entrou em commitTransaction");
+        EntityTransaction transaction = threadTransaction.get();
+        Integer transactionCount = threadTransactionCount.get();
+
         try {
-            if (tx != null && tx.isActive()) {
-                tx.commit();
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Comitou transacao");
+            if (transaction != null && transaction.isActive()) {
+                transactionCount--;
+                if (transactionCount == 0) {
+                    transaction.commit();
+                    threadTransaction.set(null);
+                    threadTransactionCount.set(null);
+                    logger.info(">>>> Comitou a transação");
+                }
+                else {
+                    threadTransactionCount.set(transactionCount);
+                }
             }
-            threadTransaction.set(null);
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException exception) {
             try {
                 rollbackTransaction();
-            } catch (RuntimeException e) {
+            } catch (RuntimeException innerException) {
+                throw new InfraestruturaException(innerException);
             }
-
-            throw new InfraestruturaException(ex);
+            throw new InfraestruturaException(exception);
         }
     }
 
     public static void rollbackTransaction() {
-        System.out.println("Vai efetuar rollback de transacao");
+        EntityTransaction transaction = threadTransaction.get();
 
-        EntityTransaction tx = threadTransaction.get();
         try {
             threadTransaction.set(null);
-            if (tx != null && tx.isActive()) {
-                tx.rollback();
+            threadTransactionCount.set(null);
+            if (transaction != null && transaction.isActive()) {
+                transaction.rollback();
+                logger.info(">>>> Deu rollback na transação");
             }
-        } catch (RuntimeException ex) {
+        }
+        catch (RuntimeException ex) {
             throw new InfraestruturaException(ex);
-        } finally {
+        }
+        finally {
             closeEntityManager();
         }
     }
 
-    public static void closeEntityManager() { // System.out.println("Vai fechar sess�o");
-
-        try {
-            EntityManager s = threadEntityManager.get();
-            threadEntityManager.set(null);
-            if (s != null && s.isOpen()) {
-                s.close();
-                System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Fechou o entity manager");
-            }
-
-            EntityTransaction tx = threadTransaction.get();
-            if (tx != null && tx.isActive()) {
+    public static void closeEntityManager() {
+        EntityTransaction transaction = threadTransaction.get();
+        Integer transactionCount = threadTransactionCount.get();
+        if (transactionCount == null || transactionCount == 0) {
+            if (transaction != null && transaction.isActive()) {
                 rollbackTransaction();
-                throw new RuntimeException("EntityManager sendo fechado " + "com transa��o ativa.");
             }
-        } catch (RuntimeException ex) {
-            throw new InfraestruturaException(ex);
+
+            EntityManager entityManager = threadEntityManager.get();
+
+            threadEntityManager.set(null);
+            threadTransactionCount.set(null);
+
+            try {
+                if (entityManager != null && entityManager.isOpen()) {
+                    entityManager.close();
+                    logger.info(">>>> Fechou o entity manager");
+                }
+            }
+            catch (RuntimeException ex) {
+                throw new InfraestruturaException(ex);
+            }
         }
     }
 }
