@@ -319,7 +319,7 @@ public class Main {
                     for (Exemplar exemplar : exemplares) {
                         System.out.println('\n' +
                                 "ID = " + exemplar.getCodigo()   +
-                                '\n' + "Quadrinho = " + exemplar.getQuadrinhos() +
+                                '\n' + "Quadrinho = " + exemplar.getQuadrinhos().getTitulo() +
                                 '\n' + "Data de Aquisição  = " + exemplar.getDataAquisicao()  +
                                 '\n' + "Editora = " + exemplar.getEditora()  +
                                 '\n' + "Data de Publicação = " + exemplar.getDataPublicacao()  +
