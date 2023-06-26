@@ -1,6 +1,8 @@
-package dao.controle;
+package em.controller;
 
 import anotacao.PersistenceContext;
+import em.impl.ProxyEntityManagerImpl;
+import jakarta.persistence.EntityManager;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
 import util.JPAUtil;
@@ -8,7 +10,8 @@ import util.JPAUtil;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-public class InterceptadorDeDao implements MethodInterceptor {
+public class InterceptadorDeEntityManager implements MethodInterceptor {
+
     /*
      * Parametros:
      *
@@ -31,32 +34,34 @@ public class InterceptadorDeDao implements MethodInterceptor {
      */
 
     public Object intercept(Object objeto, Method metodo, Object[] args, MethodProxy metodoOriginal) throws Throwable {
-        // a cada vez que um método do objeto interceptado é chamado, o interceptador busca por todos os atributos (Campos)
-        // para procurar o campo que posssui a anotação @PersistenceContext
-        // e define nesse campo o EntityManager que está no Thread corrente
         try {
-           // Lista todos os atributos(Campos) do objeto
-            Field[] campos = metodo.getDeclaringClass().getDeclaredFields();
+            // Pegando o EntityManager
+            EntityManager entityManager = JPAUtil.getEntityManager();
 
-            // percorre esses atributos(Campos) do objeto
+            // Pegando a lista de cmapos que foi declarado na classe ProxyEntityManagerImpl
+            Field[] campos = ProxyEntityManagerImpl.class.getDeclaredFields();
+
+            // Percorrendo a lista de campos
             for (Field campo : campos) {
-
-                // Verifica se o atributo(Campo) possui a anotação @PersistenceContext
+                // Verificando se o campo tem a anotação PersistenceContext
                 if (campo.isAnnotationPresent(PersistenceContext.class)) {
 
-                    // permite o acesso ao atributo(Campo) mesmo que ele seja privado ou protegido
+                    // Permitindo o acesso ao campo mesmo que ele seja privado ou protegido
                     campo.setAccessible(true);
+                    try {
 
-                    // define o EntityManager que está no Thread corrente no atributo(Campo) que possui a anotação @PersistenceContext da instância do objeto
-                    campo.set(objeto, JPAUtil.getEntityManager());
+                        // Definindo o entityManager no campo que possui a anotação PersistenceContext da instância do ProxyEntityManagerImpl
+                        campo.set(objeto, entityManager);
+                    } catch (IllegalArgumentException | IllegalAccessException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
-            // executa o método original do objeto interceptado
+            // Invocando o método original
             return metodoOriginal.invokeSuper(objeto, args);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 }

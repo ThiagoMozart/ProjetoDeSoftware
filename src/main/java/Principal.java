@@ -17,37 +17,36 @@ public class Principal {
         String dataCadastro;
         Produto umProduto;
 
-        // Entra na fÃ¡brica de serviÃ§o e pega o serviÃ§o de ProdutoAppService
         ProdutoAppService produtoAppService = FabricaDeServico.getServico(ProdutoAppService.class);
 
         boolean continua = true;
         while (continua) {
-            System.out.println('\n' + "O que vocï¿½ deseja fazer?");
+            System.out.println('\n' + "O que você deseja fazer?");
             System.out.println('\n' + "1. Cadastrar um produto");
             System.out.println("2. Alterar um produto");
             System.out.println("3. Remover um produto");
             System.out.println("4. Listar todos os produtos");
             System.out.println("5. Sair");
 
-            int opcao = Console.readInt('\n' + "Digite um nï¿½mero entre 1 e 5:");
+            int opcao = Console.readInt('\n' + "Digite um número entre 1 e 5:");
 
             switch (opcao) {
                 case 1: {
                     nome = Console.readLine('\n' + "Informe o nome do produto: ");
-                    lanceMinimo = Console.readDouble("Informe o valor do lance mï¿½nimo: ");
+                    lanceMinimo = Console.readDouble("Informe o valor do lance mínimo: ");
                     dataCadastro = Console.readLine("Informe a data de cadastramento do produto: ");
 
                     umProduto = new Produto(nome, lanceMinimo, Util.strToDate(dataCadastro));
 
                     long numero = produtoAppService.inclui(umProduto);
 
-                    System.out.println('\n' + "Produto nï¿½mero " + numero + " incluï¿½do com sucesso!");
+                    System.out.println('\n' + "Produto número " + numero + " incluído com sucesso!");
 
                     break;
                 }
 
                 case 2: {
-                    int resposta = Console.readInt('\n' + "Digite o nï¿½mero do produto que vocï¿½ deseja alterar: ");
+                    int resposta = Console.readInt('\n' + "Digite o número do produto que você deseja alterar: ");
 
                     try {
                         umProduto = produtoAppService.recuperaUmProduto((long) resposta);
@@ -56,14 +55,14 @@ public class Principal {
                         break;
                     }
 
-                    System.out.println('\n' + "Nï¿½mero = " + umProduto.getId() + "    Nome = " + umProduto.getNome()
-                            + "    Lance Mï¿½nimo = " + umProduto.getLanceMinimo());
+                    System.out.println('\n' + "Número = " + umProduto.getId() + "    Nome = " + umProduto.getNome()
+                            + "    Lance Mínimo = " + umProduto.getLanceMinimo());
 
-                    System.out.println('\n' + "O que vocï¿½ deseja alterar?");
+                    System.out.println('\n' + "O que você deseja alterar?");
                     System.out.println('\n' + "1. Nome");
-                    System.out.println("2. Lance Mï¿½nimo");
+                    System.out.println("2. Lance Mínimo");
 
-                    int opcaoAlteracao = Console.readInt('\n' + "Digite um nï¿½mero de 1 a 2:");
+                    int opcaoAlteracao = Console.readInt('\n' + "Digite um número de 1 a 2:");
 
                     switch (opcaoAlteracao) {
                         case 1:
@@ -75,7 +74,7 @@ public class Principal {
                                 produtoAppService.altera(umProduto);
 
 
-                                System.out.println('\n' + "Alteraï¿½ï¿½o de nome efetuada com sucesso!");
+                                System.out.println('\n' + "Alteração de nome efetuada com sucesso!");
                             } catch (ProdutoNaoEncontradoException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
@@ -83,14 +82,14 @@ public class Principal {
                             break;
 
                         case 2:
-                            double novoLanceMinimo = Console.readDouble("Digite o novo lance mï¿½nimo: ");
+                            double novoLanceMinimo = Console.readDouble("Digite o novo lance mínimo: ");
 
                             umProduto.setLanceMinimo(novoLanceMinimo);
 
                             try {
                                 produtoAppService.altera(umProduto);
 
-                                System.out.println('\n' + "Alteraï¿½ï¿½o de descriï¿½ï¿½o efetuada " + "com sucesso!");
+                                System.out.println('\n' + "Alteração de descrição efetuada " + "com sucesso!");
                             } catch (ProdutoNaoEncontradoException e) {
                                 System.out.println('\n' + e.getMessage());
                             }
@@ -98,14 +97,14 @@ public class Principal {
                             break;
 
                         default:
-                            System.out.println('\n' + "Opï¿½ï¿½o invï¿½lida!");
+                            System.out.println('\n' + "Opção inválida!");
                     }
 
                     break;
                 }
 
                 case 3: {
-                    int resposta = Console.readInt('\n' + "Digite o nï¿½mero do produto que vocï¿½ deseja remover: ");
+                    int resposta = Console.readInt('\n' + "Digite o número do produto que você deseja remover: ");
 
                     try {
                         umProduto = produtoAppService.recuperaUmProduto((long) resposta);
@@ -114,9 +113,9 @@ public class Principal {
                         break;
                     }
 
-                    System.out.println('\n' + "Nï¿½mero = " + umProduto.getId() + "    Nome = " + umProduto.getNome());
+                    System.out.println('\n' + "Número = " + umProduto.getId() + "    Nome = " + umProduto.getNome());
 
-                    String resp = Console.readLine('\n' + "Confirma a remoï¿½ï¿½o do produto?");
+                    String resp = Console.readLine('\n' + "Confirma a remoção do produto?");
 
                     if (resp.equals("s")) {
                         try {
@@ -127,7 +126,7 @@ public class Principal {
                             System.out.println('\n' + e.getMessage());
                         }
                     } else {
-                        System.out.println('\n' + "Produto nï¿½o removido.");
+                        System.out.println('\n' + "Produto não removido.");
                     }
 
                     break;
@@ -138,7 +137,7 @@ public class Principal {
 
                     for (Produto produto : produtos) {
                         System.out.println(
-                                '\n' + "Id = " + produto.getId() + "  Nome = " + produto.getNome() + "  Lance mï¿½nimo = "
+                                '\n' + "Id = " + produto.getId() + "  Nome = " + produto.getNome() + "  Lance mínimo = "
                                         + produto.getLanceMinimo() + "  Data Cadastro = " + produto.getDataCadastroMasc());
                     }
 
@@ -151,7 +150,7 @@ public class Principal {
                 }
 
                 default:
-                    System.out.println('\n' + "Opï¿½ï¿½o invï¿½lida!");
+                    System.out.println('\n' + "Opção inválida!");
             }
         }
     }

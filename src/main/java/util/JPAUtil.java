@@ -17,7 +17,7 @@ public class JPAUtil {
 
 
 	private JPAUtil() {
-		emf = Persistence.createEntityManagerFactory("trabalho04a");
+		emf = Persistence.createEntityManagerFactory("trabalho04b");
 	}
 
 	public static void beginTransaction() {

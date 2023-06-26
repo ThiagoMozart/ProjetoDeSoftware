@@ -3,6 +3,7 @@ package dao.impl;
 import java.util.List;
 
 
+import anotacao.Autowired;
 import anotacao.PersistenceContext;
 import dao.ProdutoDAO;
 import excecao.InfraestruturaException;
@@ -12,9 +13,13 @@ import jakarta.persistence.LockModeType;
 import modelo.Produto;
 
 public class ProdutoDAOImpl implements ProdutoDAO {
-	
-	@PersistenceContext
+
+	@Autowired
 	protected EntityManager em;
+
+	// utilizado para instanciar dentro da FábricaDeDAOs
+	public ProdutoDAOImpl() {
+	}
 
 	public long inclui(Produto umProduto) {
 		try {
