@@ -25,7 +25,7 @@ public class JPAUtil {
         EntityTransaction transaction = threadTransaction.get();
 
         // tenta pegar a quantidade de "transações" abertas que existem no thread corrente
-        // Só vai existir no máximo uma transação em aberto no thread atual, porem utilizamos essa cariavel para saber quantas vezes foram pedidos para abrir uma transação.
+        // Só vai existir no máximo uma transação em aberto no thread atual, porem utilizamos essa variavel para saber quantas vezes foram pedidos para abrir uma transação.
         // Pois usaremos ela para saber qual é o momento certo de fechar a transação,
         // já que no momento em que formos fechar a transação só podemos fechar ela se essa for a transação mais externa,
         // ou seja, a primeira transação, a que realmente foi aberta.
