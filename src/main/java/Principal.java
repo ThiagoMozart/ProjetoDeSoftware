@@ -1,156 +1,147 @@
-
-import java.util.List;
-
 import corejava.Console;
-import excecao.ProdutoNaoEncontradoException;
-import modelo.Produto;
-import servico.ProdutoAppService;
-import servico.controle.FabricaDeServico;
-import util.Util;
+import excecao.UsuarioNaoEncontradoException;
+import modelo.Usuario;
+import servico.UsuarioAppService;
+
 
 public class Principal {
 
     public static void main(String[] args) {
-
+        long id;
+        String cpf;
         String nome;
-        double lanceMinimo;
-        String dataCadastro;
-        Produto umProduto;
+        Usuario umUsuario;
 
-        ProdutoAppService produtoAppService = FabricaDeServico.getServico(ProdutoAppService.class);
+        ApplicationContext fabrica = new ClassPathXmlApplicationContext("beans-jpa.xml");
+        UsuarioAppService usuarioAppService = (UsuarioAppService) fabrica.getBean("usuarioAppService");
 
         boolean continua = true;
         while (continua) {
-            System.out.println('\n' + "O que você deseja fazer?");
-            System.out.println('\n' + "1. Cadastrar um produto");
-            System.out.println("2. Alterar um produto");
-            System.out.println("3. Remover um produto");
-            System.out.println("4. Listar todos os produtos");
-            System.out.println("5. Sair");
+            System.out.println("\nO que você deseja fazer?");
+            System.out.println("\n1. Cadastrar uma pessoa");
+            System.out.println("2. Alterar uma pessoa");
+            System.out.println("3. Remover uma pessoa");
+            System.out.println("4. Listar pessoas");
+            System.out.println("5. Recuperar uma pessoa");
+            System.out.println("6. Recuperar uma pessoa e Roles");
+            System.out.println("7. Sair");
 
-            int opcao = Console.readInt('\n' + "Digite um número entre 1 e 5:");
+            int opcao = Console.readInt("\nDigite um número entre 1 e 7:");
 
             switch (opcao) {
-                case 1: {
-                    nome = Console.readLine('\n' + "Informe o nome do produto: ");
-                    lanceMinimo = Console.readDouble("Informe o valor do lance mínimo: ");
-                    dataCadastro = Console.readLine("Informe a data de cadastramento do produto: ");
+                case 1 -> {
+                    nome = Console.readLine("\nInforme o nome da pessoa: ");
+                    cpf = Console.readLine("Informe o CPF da pessoa: ");
 
-                    umProduto = new Produto(nome, lanceMinimo, Util.strToDate(dataCadastro));
+                    umUsuario = new Usuario();
+                    umUsuario.setNome(nome);
+                    umUsuario.setCpf(cpf);
 
-                    long numero = produtoAppService.inclui(umProduto);
+                    id = UsuarioAppService.inclui(umUsuario);
 
-                    System.out.println('\n' + "Produto número " + numero + " incluído com sucesso!");
-
-                    break;
+                    System.out.println("\nProduto número " + id + " incluído com sucesso!");
                 }
-
-                case 2: {
-                    int resposta = Console.readInt('\n' + "Digite o número do produto que você deseja alterar: ");
+                case 2 -> {
+                    id = Console.readInt("\nDigite o id da pessoa que você deseja alterar: ");
 
                     try {
-                        umProduto = produtoAppService.recuperaUmProduto((long) resposta);
-                    } catch (ProdutoNaoEncontradoException e) {
-                        System.out.println('\n' + e.getMessage());
+                        umUsuario = usuarioAppService.recuperaUmUsuario(id);
+                    } catch (UsuarioNaoEncontradoException e) {
+                        System.out.println(e.getMessage());
                         break;
                     }
 
-                    System.out.println('\n' + "Número = " + umProduto.getId() + "    Nome = " + umProduto.getNome()
-                            + "    Lance Mínimo = " + umProduto.getLanceMinimo());
+                    System.out.println(umUsuario);
 
-                    System.out.println('\n' + "O que você deseja alterar?");
-                    System.out.println('\n' + "1. Nome");
-                    System.out.println("2. Lance Mínimo");
+                    System.out.println("\nO que você deseja alterar?");
+                    System.out.println("\n1. Nome");
+                    System.out.println("2. CPF");
 
-                    int opcaoAlteracao = Console.readInt('\n' + "Digite um número de 1 a 2:");
+                    boolean esperandoOpcao = true;
+                    while (esperandoOpcao) {
+                        int opcaoAlteracao = Console.readInt("\nDigite um número de 1 a 2:");
 
-                    switch (opcaoAlteracao) {
-                        case 1:
-                            String novoNome = Console.readLine("Digite o novo nome: ");
+                        switch (opcaoAlteracao) {
+                            case 1 -> {
+                                esperandoOpcao = false;
+                                nome = Console.readLine("Digite o novo nome: ");
+                                umUsuario.setNome(nome);
 
-                            umProduto.setNome(novoNome);
-
-                            try {
-                                produtoAppService.altera(umProduto);
-
-
-                                System.out.println('\n' + "Alteração de nome efetuada com sucesso!");
-                            } catch (ProdutoNaoEncontradoException e) {
-                                System.out.println('\n' + e.getMessage());
+                                try {
+                                    UsuarioAppService.altera(umUsuario);
+                                    System.out.println("Alteração de nome efetuada com sucesso!");
+                                } catch (UsuarioNaoEncontradoException e) {
+                                    System.out.println(e.getMessage());
+                                }
                             }
+                            case 2 -> {
+                                cpf = Console.readLine("Digite o novo CPF: ");
+                                umUsuario.setCpf(cpf);
 
-                            break;
-
-                        case 2:
-                            double novoLanceMinimo = Console.readDouble("Digite o novo lance mínimo: ");
-
-                            umProduto.setLanceMinimo(novoLanceMinimo);
-
-                            try {
-                                produtoAppService.altera(umProduto);
-
-                                System.out.println('\n' + "Alteração de descrição efetuada " + "com sucesso!");
-                            } catch (ProdutoNaoEncontradoException e) {
-                                System.out.println('\n' + e.getMessage());
+                                esperandoOpcao = false;
+                                try {
+                                    usuarioAppService.altera(umUsuario);
+                                    System.out.println("\nAlteração de descrição efetuada com sucesso!");
+                                } catch (UsuarioNaoEncontradoException e) {
+                                    System.out.println(e.getMessage());
+                                }
                             }
-
-                            break;
-
-                        default:
-                            System.out.println('\n' + "Opção inválida!");
+                            default -> System.out.println("Opção inválida!");
+                        }
                     }
-
-                    break;
                 }
-
-                case 3: {
-                    int resposta = Console.readInt('\n' + "Digite o número do produto que você deseja remover: ");
+                case 3 -> {
+                    id = Console.readInt("\nDigite o id da pessoa que você deseja remover: ");
 
                     try {
-                        umProduto = produtoAppService.recuperaUmProduto((long) resposta);
-                    } catch (ProdutoNaoEncontradoException e) {
-                        System.out.println('\n' + e.getMessage());
+                        umUsuario = usuarioAppService.recuperaUmUsuario(id);
+                    } catch (UsuarioNaoEncontradoException e) {
+                        System.out.println(e.getMessage());
                         break;
                     }
 
-                    System.out.println('\n' + "Número = " + umProduto.getId() + "    Nome = " + umProduto.getNome());
+                    System.out.println(umUsuario);
 
-                    String resp = Console.readLine('\n' + "Confirma a remoção do produto?");
+                    String resp = Console.readLine("Confirma a remoção da pessoa? (s/n)");
 
                     if (resp.equals("s")) {
                         try {
-                            produtoAppService.exclui(umProduto.getId());
-
-                            System.out.println('\n' + "Produto removido com sucesso!");
-                        } catch (ProdutoNaoEncontradoException e) {
-                            System.out.println('\n' + e.getMessage());
+                            usuarioAppService.exclui(umUsuario);
+                            System.out.println("\nPessoa removida com sucesso!");
+                        } catch (UsuarioNaoEncontradoException e) {
+                            System.out.println(e.getMessage());
                         }
                     } else {
-                        System.out.println('\n' + "Produto não removido.");
+                        System.out.println("\nPessoa não removido.");
                     }
 
-                    break;
                 }
+                case 4 -> usuarioAppService.recuperaUsuarios().forEach(System.out::println);
+                case 5 -> {
+                    id = Console.readInt("\nDigite o id da pessoa que você quer recuperar: ");
 
-                case 4: {
-                    List<Produto> produtos = produtoAppService.recuperaProdutos();
-
-                    for (Produto produto : produtos) {
-                        System.out.println(
-                                '\n' + "Id = " + produto.getId() + "  Nome = " + produto.getNome() + "  Lance mínimo = "
-                                        + produto.getLanceMinimo() + "  Data Cadastro = " + produto.getDataCadastroMasc());
+                    try {
+                        umUsuario = usuarioAppService.recuperaUmUsuario(id);
+                        System.out.println(umUsuario);
+                    } catch (UsuarioNaoEncontradoException e) {
+                        System.out.println(e.getMessage());
                     }
-
-                    break;
                 }
+                case 6 -> {
+                    id = Console.readInt("\nDigite o id da pessoa que você quer recuperar: ");
 
-                case 5: {
-                    continua = false;
-                    break;
+                    try {
+                        umUsuario = usuarioAppService.recuperaUmUsuarioEPedido(id);
+                        System.out.println("Pessoa:");
+                        System.out.println(umUsuario);
+                        System.out.println("Pedido:");
+                        umUsuario.getPedido().forEach(System.out::println);
+                    } catch (UsuarioNaoEncontradoException e) {
+                        System.out.println(e.getMessage());
+                    }
                 }
-
-                default:
-                    System.out.println('\n' + "Opção inválida!");
+                case 7 -> continua = false;
+                default -> System.out.println("\nOpção inválida!");
             }
         }
     }
