@@ -7,15 +7,13 @@ import modelo.Usuario;
 
 import java.util.List;
 
-public interface UsuarioDAO extends DaoGenerico<Usuario, Long> {
+public interface UsuarioDAO extends DAOGenerico<Usuario, Long> {
     @RecuperaObjeto
     Usuario recuperaUmUsuario(Long id) throws ObjetoNaoEncontradoException;
 
-    @RecuperaLista
+    @RecuperaObjeto
     Usuario recuperaUmUsuarioEPedido(Long id) throws ObjetoNaoEncontradoException;
 
     @RecuperaLista
     List<Usuario> recuperaUsuarios();
-
-
 }

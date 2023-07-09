@@ -45,7 +45,7 @@ public class InterceptadorDeDAO implements MethodInterceptor {
         }
         else {
             throw new RuntimeException("Executando o método: " + metodo.getName() +
-                    " da classe/interface " + metodo.getDeclaringClass().getName() +
+                    " da classe " + metodo.getDeclaringClass().getName() +
                     " que não é final e nem está anotado.");
         }
     }

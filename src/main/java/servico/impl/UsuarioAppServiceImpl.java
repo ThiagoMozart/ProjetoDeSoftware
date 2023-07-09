@@ -17,13 +17,13 @@ public class UsuarioAppServiceImpl implements UsuarioAppService {
 	private final UsuarioDAO usuarioDAO;
 
 	@Autowired
-	public UsuarioAppService(UsuarioDAO usuarioDAO) {
+	public UsuarioAppServiceImpl(UsuarioDAO usuarioDAO) {
 		this.usuarioDAO = usuarioDAO;
 	}
 	@Override
 	@Transactional
 	public long inclui(Usuario umUsuario) {
-		return usuarioDAO.inclui(umUsuario);
+		return usuarioDAO.inclui(umUsuario).getId();
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class UsuarioAppServiceImpl implements UsuarioAppService {
 		try {
 			usuarioDAO.altera(umUsuario);
 		}
-		catch (ObjetoNaoEncontradoException e) {
+		catch (Exception e) {
 			throw new UsuarioNaoEncontradoException("Usuario nao encontrado");
 		}
 	}
@@ -41,7 +41,7 @@ public class UsuarioAppServiceImpl implements UsuarioAppService {
 		try {
 			usuarioDAO.exclui(umUsuario);
 		}
-		catch (ObjetoNaoEncontradoException e) {
+		catch (Exception e) {
 			throw new UsuarioNaoEncontradoException("Usuario nao encontrado");
 		}
 	}
@@ -51,16 +51,17 @@ public class UsuarioAppServiceImpl implements UsuarioAppService {
 			return usuarioDAO.recuperaUmUsuario(id);
 		}
 		catch (ObjetoNaoEncontradoException e) {
-			throw new UsuarioNaoEncontradoException("Produto nao encontrado");
+			throw new UsuarioNaoEncontradoException("Usuario nao encontrado");
 		}
 	}
 
 	@Override
-	public Usuario recuperaUmUsuarionEPedido(Long id) throws UsuarioNaoEncontradoException {
+	public Usuario recuperaUmUsuarioEPedido(Long id) throws UsuarioNaoEncontradoException {
 		try {
 			return usuarioDAO.recuperaUmUsuarioEPedido(id);
-		} catch (ObjetoNaoEncontradoException e) {
-			throw new UsuarioNaoEncontradoException("Usuario não encontrado");
+		}
+		catch (ObjetoNaoEncontradoException e) {
+			throw new UsuarioNaoEncontradoException("Usuario ou Pedido nao encontrado");
 		}
 	}
 

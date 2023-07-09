@@ -5,6 +5,8 @@ import lombok.*;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -15,7 +17,9 @@ import org.hibernate.annotations.DynamicUpdate;
 
 @NamedQueries({
         @NamedQuery(name = "Usuario.recuperaUmUsuario", query = "select u from Usuario u where u.id = ?1"),
-        @NamedQuery(name = "Usuario.recuperaUsuarios", query = "select u from Usuario u order by u.id") })
+        @NamedQuery(name = "Usuario.recuperaUsuarios", query = "select u from Usuario u order by u.id"),
+        @NamedQuery(name = "Usuario.recuperaUmUsuarioEPedido", query = "select u from Usuario u left outer join fetch u.pedidos where u.id = ?1")
+})
 
 @DynamicInsert
 @DynamicUpdate
@@ -36,4 +40,11 @@ public class Usuario {
     private Boolean fidelidade;
     @Version
     private Integer versao;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "usuario")
+    private List<Pedido> pedidos;
+
+    @Override
+    public String toString() {
+        return "nome: " + nome;
+    }
 }

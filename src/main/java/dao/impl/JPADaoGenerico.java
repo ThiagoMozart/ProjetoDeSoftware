@@ -13,14 +13,14 @@ public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
 
     @PersistenceContext
     public EntityManager em;
-    private Class<T> tipo;
+    private final Class<T> tipo;
 
     public JPADaoGenerico(Class<T> tipo) {
         this.tipo = tipo;
     }
 
     @Override
-    public T inclui(T umObjeto) {
+    public final T inclui(T umObjeto) {
         try{
             em.persist(umObjeto);
         } catch (RuntimeException e) {
@@ -30,7 +30,7 @@ public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
     }
 
     @Override
-    public void altera(T umObjeto) {
+    public final void altera(T umObjeto) {
         try{
             em.merge(umObjeto);
         } catch (RuntimeException e) {
@@ -39,16 +39,22 @@ public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
     }
 
     @Override
-    public void exclui(T umObjeto) {
+    public final void exclui(T umObjeto) {
         try{
-            em.remove(umObjeto);
+            if (em.contains(umObjeto)) {
+                em.remove(umObjeto);
+            }
+            else {
+                umObjeto = em.merge(umObjeto);
+                em.remove(umObjeto);
+            }
         } catch (RuntimeException e) {
             throw new InfraestruturaException(e);
         }
     }
 
     @Override
-    public T getPorId(PK umId) throws ObjetoNaoEncontradoException {
+    public final T getPorId(PK umId) throws ObjetoNaoEncontradoException {
         T umObjeto;
 
         try{
@@ -63,7 +69,7 @@ public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
     }
 
     @Override
-    public T getPorIdComLock(PK umId) throws ObjetoNaoEncontradoException {
+    public final T getPorIdComLock(PK umId) throws ObjetoNaoEncontradoException {
         T umObjeto;
 
         try{
@@ -78,7 +84,6 @@ public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
     }
 
     @SuppressWarnings("unchecked")
-    @RecuperaObjeto
     public final T busca(Method metodo, Object[] args) throws InfraestruturaException {
         T umObjeto;
 
@@ -88,7 +93,7 @@ public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
 
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
-                    (query).setParameter(i+1, args[i]);
+                    query.setParameter(i+1, args[i]);
                 }
             }
             umObjeto = (T) query.getSingleResult();
@@ -107,7 +112,7 @@ public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
 
             if (args != null) {
                 for (int i = 0; i < args.length; i++) {
-                    ((query).setParameter(i+1, args[i]);
+                    query.setParameter(i+1, args[i]);
                 }
             }
             return (List<T>) query.getResultList();

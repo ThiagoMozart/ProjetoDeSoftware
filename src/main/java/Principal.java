@@ -1,6 +1,8 @@
 import corejava.Console;
 import excecao.UsuarioNaoEncontradoException;
 import modelo.Usuario;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import servico.UsuarioAppService;
 
 
@@ -18,31 +20,31 @@ public class Principal {
         boolean continua = true;
         while (continua) {
             System.out.println("\nO que você deseja fazer?");
-            System.out.println("\n1. Cadastrar uma pessoa");
-            System.out.println("2. Alterar uma pessoa");
-            System.out.println("3. Remover uma pessoa");
-            System.out.println("4. Listar pessoas");
-            System.out.println("5. Recuperar uma pessoa");
-            System.out.println("6. Recuperar uma pessoa e Roles");
+            System.out.println("\n1. Cadastrar um usuario");
+            System.out.println("2. Alterar um usuario");
+            System.out.println("3. Remover um usuario");
+            System.out.println("4. Listar usuarios");
+            System.out.println("5. Recuperar um usuario");
+            System.out.println("6. Recuperar um usuario e Pedidos");
             System.out.println("7. Sair");
 
             int opcao = Console.readInt("\nDigite um número entre 1 e 7:");
 
             switch (opcao) {
                 case 1 -> {
-                    nome = Console.readLine("\nInforme o nome da pessoa: ");
-                    cpf = Console.readLine("Informe o CPF da pessoa: ");
+                    nome = Console.readLine("\nInforme o nome do usuario: ");
+                    cpf = Console.readLine("Informe o CPF do usuario: ");
 
                     umUsuario = new Usuario();
                     umUsuario.setNome(nome);
                     umUsuario.setCpf(cpf);
 
-                    id = UsuarioAppService.inclui(umUsuario);
+                    id = usuarioAppService.inclui(umUsuario);
 
-                    System.out.println("\nProduto número " + id + " incluído com sucesso!");
+                    System.out.println("\nUsuario tem o id " + id + " incluído com sucesso!");
                 }
                 case 2 -> {
-                    id = Console.readInt("\nDigite o id da pessoa que você deseja alterar: ");
+                    id = Console.readInt("\nDigite o id do usuario que você deseja alterar: ");
 
                     try {
                         umUsuario = usuarioAppService.recuperaUmUsuario(id);
@@ -68,7 +70,7 @@ public class Principal {
                                 umUsuario.setNome(nome);
 
                                 try {
-                                    UsuarioAppService.altera(umUsuario);
+                                    usuarioAppService.altera(umUsuario);
                                     System.out.println("Alteração de nome efetuada com sucesso!");
                                 } catch (UsuarioNaoEncontradoException e) {
                                     System.out.println(e.getMessage());
@@ -91,7 +93,7 @@ public class Principal {
                     }
                 }
                 case 3 -> {
-                    id = Console.readInt("\nDigite o id da pessoa que você deseja remover: ");
+                    id = Console.readInt("\nDigite o id da usuario que você deseja remover: ");
 
                     try {
                         umUsuario = usuarioAppService.recuperaUmUsuario(id);
@@ -102,23 +104,23 @@ public class Principal {
 
                     System.out.println(umUsuario);
 
-                    String resp = Console.readLine("Confirma a remoção da pessoa? (s/n)");
+                    String resp = Console.readLine("Confirma a remoção do usuario? (s/n)");
 
                     if (resp.equals("s")) {
                         try {
                             usuarioAppService.exclui(umUsuario);
-                            System.out.println("\nPessoa removida com sucesso!");
+                            System.out.println("\nUsuario removido com sucesso!");
                         } catch (UsuarioNaoEncontradoException e) {
                             System.out.println(e.getMessage());
                         }
                     } else {
-                        System.out.println("\nPessoa não removido.");
+                        System.out.println("\nUsuario não removido.");
                     }
 
                 }
                 case 4 -> usuarioAppService.recuperaUsuarios().forEach(System.out::println);
                 case 5 -> {
-                    id = Console.readInt("\nDigite o id da pessoa que você quer recuperar: ");
+                    id = Console.readInt("\nDigite o id do usuario que você quer recuperar: ");
 
                     try {
                         umUsuario = usuarioAppService.recuperaUmUsuario(id);
@@ -128,14 +130,14 @@ public class Principal {
                     }
                 }
                 case 6 -> {
-                    id = Console.readInt("\nDigite o id da pessoa que você quer recuperar: ");
+                    id = Console.readInt("\nDigite o id do usuario que você quer recuperar: ");
 
                     try {
                         umUsuario = usuarioAppService.recuperaUmUsuarioEPedido(id);
-                        System.out.println("Pessoa:");
+                        System.out.println("Usuario:");
                         System.out.println(umUsuario);
                         System.out.println("Pedido:");
-                        umUsuario.getPedido().forEach(System.out::println);
+                        umUsuario.getPedidos().forEach(System.out::println);
                     } catch (UsuarioNaoEncontradoException e) {
                         System.out.println(e.getMessage());
                     }
