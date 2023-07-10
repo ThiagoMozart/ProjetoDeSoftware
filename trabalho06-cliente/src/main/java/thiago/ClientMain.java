@@ -16,10 +16,25 @@ import java.util.List;
 
 public class ClientMain {
 
+    // declara o logger do SLF4J, que é um framework de logging para Java.
+    // É utilizado a classe LoggerFactory do SLF4J para fazer a inicialização desse logger,
+    // utilizando o método getLogger com o argumento ClientMain.class, que específica a
+    // classe na qual o logger será inicializado.
     private static final Logger logger = LoggerFactory.getLogger(ClientMain.class);
+
+    // declara o objeto restTemplate do tipo RestTemplate do Spring,
+    // uma classe uitlizada para fazer requisições HTTP e consumir serviços web RESTful.
+    // Ela é utilizada para lidar com várias conexões HTTP, com métodos GET, POST, PUT, DELETE, etc.
     private static final RestTemplate restTemplate = new RestTemplate();
 
     public static void main(String[] args) {
+
+        // seta um ErrorHandler para o restTemplate utilizado.
+        // ErrorHandler é a classe onde está definido a lógica para lidar com
+        // erros que poderão acontecer nas requisições HTTP. No caso dessa aplicação,
+        // foi criado um ErrorHandler customizado, no qual implementa a interface
+        // ResponseErrorHandler, interface essa que define os métodos para lidar com
+        // erros padrões que podem ocorrer nas requisições HTTP.
         restTemplate.setErrorHandler(new ErrorHandler());
 
         logger.info("Iniciando a execução da aplicação cliente.");
@@ -62,7 +77,15 @@ public class ClientMain {
                     while (add.equals("s")) {
                         id = Console.readInt("\nInforme o ID do pedido: ");
                         try {
-                            // faz o método Get para o servidor, passando  o id do pedido e a classe
+
+                            // O objeto 'res' é utilizado para ser atribuido a uma
+                            // response retornado por um web service RESTful. O método 'exchange'
+                            // é utilizado para enviar um HTTP request para um URL específica, no caso,
+                            // a que foi declarada abaixo, e após receber essa response, ela mapeia o body
+                            // da response para uma instância de Pedido. Por fim, o objeto 'res' irá
+                            // conter o código de status HTTP, os headers da requisição e o body da response,
+                            // (nesse caso o próprio Pedido), que será acessado abaixo e adicionado a lista
+                            // de pedidos que será adicionado aos pedidos do banco de dados.
                             ResponseEntity<Pedido> res = restTemplate.exchange(
                                     "http://localhost:8080/pedidos/{id}",
                                     HttpMethod.GET,
@@ -84,6 +107,16 @@ public class ClientMain {
 
                     try {
 
+                        // O objeto 'res' acima é utilizado para ser atribuido a uma
+                        // response retornado por um web service RESTful. O método 'postForEntity'
+                        // é utilizado para performar um request HTTP POST para a URL acima, e envia
+                        // o objeto 'usuario', que representa os dados que  serão enviados no body para
+                        // essa requisição. A URL acima é utilizada como endpoint do web service RESTful
+                        // onde esse POST request será enviado. Usuario.class nesse caso representa
+                        // o tipo de response esperado, especificando para qual instância de classe será mapeado
+                        // a response.
+                        // Por fim, o objeto 'res' irá conter o código de status HTTP, os headers da requisição
+                        // e o body da response, (nesse caso o próprio Usuario), que será acessado abaixo.
                         ResponseEntity<Usuario> res = restTemplate.postForEntity(
                                 "http://localhost:8080/usuarios/",
                                 usuario,
@@ -371,8 +404,15 @@ public class ClientMain {
         }
     }
 
+    // O método recuperarObjeto é utilizado recuperar um objeto genérico a partir
+    // de uma URL passada e uma classe genérica.
     private static <T> T recuperarObjeto(String msg, String url, Class<T> classe) {
         int id = Console.readInt('\n' + msg);
+
+        // O método getForObject faz um HTTP GET request, para a url especificada
+        // e espera uma response do tipo da classe especificada acima. Por exemplo,
+        // se o objeto classe for 'Usuario.class', a response será uma instância
+        // da classe Usuario.
         return restTemplate.getForObject(url, classe, id);
     }
 }
