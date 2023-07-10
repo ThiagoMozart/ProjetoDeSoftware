@@ -29,12 +29,14 @@ public class InterceptadorDeDAO implements MethodInterceptor {
      * mesmo m?todo sobre um objeto diferente do mesmo tipo.
      *
      */
-
+    // o método InterceptadorDeDao irá interceptar o método chamado
+    // e verificar qual anotação o método do UsuarioDao tem para retornar.
     public Object intercept(Object objeto, Method metodo, Object[] args, MethodProxy metodoProxy) throws Throwable {
 
         System.out.println("Método interceptado do DAO: " + metodo.getName() +
         " da classe " + metodo.getDeclaringClass().getName());
 
+        // Ele faz um cast dd Object para JPADaoGenerico para que possa executar os métodos
         JPADaoGenerico<? ,?> daoGenerico = (JPADaoGenerico<?, ?>) objeto;
 
         if (metodo.isAnnotationPresent(RecuperaObjeto.class)) {

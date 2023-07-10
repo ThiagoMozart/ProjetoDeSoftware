@@ -16,6 +16,9 @@ public class UsuarioAppServiceImpl implements UsuarioAppService {
 
 	private final UsuarioDAO usuarioDAO;
 
+	// nessa variável UsuarioDAO será injetado o Proxy do DAO
+	// e irá injetar na váriavel aquela instância que foi criada utilizando
+	// aquele método anotado com @Bean
 	@Autowired
 	public UsuarioAppServiceImpl(UsuarioDAO usuarioDAO) {
 		this.usuarioDAO = usuarioDAO;

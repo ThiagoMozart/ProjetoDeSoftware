@@ -14,7 +14,10 @@ public class Principal {
         String nome;
         Usuario umUsuario;
 
+        // irá procurar um arquivo de configuração denominado Bean-jpa
+        //Fabrica é um ApplicationContext que é criado apartir do arquivo
         ApplicationContext fabrica = new ClassPathXmlApplicationContext("beans-jpa.xml");
+        //O proxy de serviço está dentro do Bean-jpa, que pega a implementação (no caso UsuarioAppServiceImpl)
         UsuarioAppService usuarioAppService = (UsuarioAppService) fabrica.getBean("usuarioAppService");
 
         boolean continua = true;
