@@ -60,8 +60,9 @@ public class ClientMain {
 
                     String add = Console.readLine("Deseja adicionar pedidos? (s/n): ");
                     while (add.equals("s")) {
-                        id = Console.readInt("\nInforme o ID d pedido: ");
+                        id = Console.readInt("\nInforme o ID do pedido: ");
                         try {
+                            // faz o método Get para o servidor, passando  o id do pedido e a classe
                             ResponseEntity<Pedido> res = restTemplate.exchange(
                                     "http://localhost:8080/pedidos/{id}",
                                     HttpMethod.GET,
