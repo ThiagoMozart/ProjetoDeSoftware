@@ -1,6 +1,5 @@
 package dao.impl;
 
-import anotacao.RecuperaObjeto;
 import dao.DAOGenerico;
 import excecao.InfraestruturaException;
 import excecao.ObjetoNaoEncontradoException;
@@ -12,7 +11,7 @@ import java.util.List;
 public class JPADaoGenerico<T, PK> implements DAOGenerico<T, PK> {
 
     @PersistenceContext
-    public EntityManager em;
+    protected EntityManager em;
     private final Class<T> tipo;
 
     public JPADaoGenerico(Class<T> tipo) {

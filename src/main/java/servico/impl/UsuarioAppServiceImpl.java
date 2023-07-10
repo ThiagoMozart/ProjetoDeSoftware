@@ -39,6 +39,7 @@ public class UsuarioAppServiceImpl implements UsuarioAppService {
 			throw new UsuarioNaoEncontradoException("Usuario nao encontrado");
 		}
 	}
+	@Transactional
 	@Override
 	public void exclui(Usuario umUsuario) throws UsuarioNaoEncontradoException {
 		try {

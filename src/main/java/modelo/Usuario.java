@@ -45,6 +45,6 @@ public class Usuario {
 
     @Override
     public String toString() {
-        return "nome: " + nome;
+        return "nome: " + nome + " id: " + id;
     }
 }
